@@ -40,10 +40,10 @@ class TubeGrower(object):
         dependentField = self.dependentField
         boundaryConditions = iron.BoundaryConditions()
         nonlinearEquations.BoundaryConditionsCreateStart(boundaryConditions)
-        numberOfCircumfrentialElementsPerQuarter = int(self.circumferentialElements/4)
-        numberOfCircumfrentialElements = self.circumferentialElements
+        numberOfCircumferentialElementsPerQuarter = int(self.circumferentialElements/4)
+        numberOfCircumferentialElements = self.circumferentialElements
         numberOfLengthNodes = self.axialElements+1
-        numberOfCircumfrentialNodes = numberOfCircumfrentialElements
+        numberOfCircumferentialNodes = numberOfCircumferentialElements
         
         
         #nodelistx = [91,99,107,115,123,131,139]
@@ -74,14 +74,25 @@ class TubeGrower(object):
             #boundaryConditions.AddNode(dependentField,iron.FieldVariableTypes.U,1,iron.GlobalDerivativeConstants.GLOBAL_DERIV_S1,nodeNumber,3,iron.BoundaryConditionsTypes.FIXED,0.0)        
         nonlinearEquations.BoundaryConditionsCreateFinish()
 
-    def setupGrowthRates(self,fibreGrowthRate,sheetGrowthRate,normalGrowthRate):
+    def setupGrowthRates(self,growthElementRate):
+        numberOfCircumferentialElements = self.circumferentialElements
+        numberOfLengthElements = self.axialElements
+        numberOfWallElements = self.wallElements
+        numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
         growthCellMLParametersField = self.growthCellMLParametersField
-        growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,
-                                                                iron.FieldParameterSetTypes.VALUES,1,fibreGrowthRate[0])
-        growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,
-                                                                iron.FieldParameterSetTypes.VALUES,2,sheetGrowthRate[0])
-        growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,
-                                                                iron.FieldParameterSetTypes.VALUES,3,normalGrowthRate[0])
+        #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,1,fibreGrowthRate[0])
+        #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,2,sheetGrowthRate[0])
+        #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,3,normalGrowthRate[0])
+        for elementNumber in range (1, numberOfElements+1):
+            for gaussPointNumber in range (1,27+1):
+                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,1,growthElementRate[elementNumber-1,0])
+                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,2,growthElementRate[elementNumber-1,1])
+                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,3,growthElementRate[elementNumber-1,2])
+        growthCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
+        growthCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)    
 
 
     def setupGeometry(self,geometricField,stage):
@@ -126,10 +137,10 @@ class TubeGrower(object):
                 
         # Number of Gauss points used
         numberOfGaussXi = 3
-        numberOfCircumfrentialElements = self.circumferentialElements
+        numberOfCircumferentialElements = self.circumferentialElements
         numberOfLengthElements = self.axialElements
         numberOfLengthNodes = self.axialElements+1
-        numberOfCircumfrentialNodes = numberOfCircumfrentialElements
+        numberOfCircumferentialNodes = numberOfCircumferentialElements
         numberOfWallNodes = self.wallElements+1
         numberOfWallElements = self.wallElements
         
@@ -195,10 +206,9 @@ class TubeGrower(object):
         trilinearLagrangeBasis.CreateFinish()
         
         # Start the creation of a manually generated mesh in the region
-        numberOfNodes = numberOfCircumfrentialElements*(numberOfLengthElements+1)*(numberOfWallElements+1)
-        numberOfElements = numberOfCircumfrentialElements*numberOfLengthElements*numberOfWallElements
-        
-        
+        numberOfNodes = numberOfCircumferentialElements*(numberOfLengthElements+1)*(numberOfWallElements+1)
+        numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
+               
         # Define nodes for the mesh
         nodes = iron.Nodes()
         nodes.CreateStart(region,numberOfNodes)
@@ -218,21 +228,21 @@ class TubeGrower(object):
         elementNumber = 0
         for wallElementIdx in range(1,numberOfWallElements+1):
             for lengthElementIdx in range(1,numberOfLengthElements+1):
-                for circumfrentialElementIdx in range(1,numberOfCircumfrentialElements+1):
+                for circumferentialElementIdx in range(1,numberOfCircumferentialElements+1):
                     elementNumber = elementNumber + 1
-                    localNode1 = circumfrentialElementIdx + (lengthElementIdx-1)*numberOfCircumfrentialNodes + \
-                        (wallElementIdx-1)*numberOfCircumfrentialNodes*numberOfLengthNodes
-                    if circumfrentialElementIdx == numberOfCircumfrentialElements:
-                        localNode2 = 1 + (lengthElementIdx-1)*numberOfCircumfrentialNodes + \
-                            (wallElementIdx-1)*numberOfCircumfrentialNodes*numberOfLengthNodes
+                    localNode1 = circumferentialElementIdx + (lengthElementIdx-1)*numberOfCircumferentialNodes + \
+                        (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
+                    if circumferentialElementIdx == numberOfCircumferentialElements:
+                        localNode2 = 1 + (lengthElementIdx-1)*numberOfCircumferentialNodes + \
+                            (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
                     else:
                         localNode2 = localNode1 + 1
-                    localNode3 = localNode1 + numberOfCircumfrentialNodes
-                    localNode4 = localNode2 + numberOfCircumfrentialNodes
-                    localNode5 = localNode1 + numberOfCircumfrentialNodes*numberOfLengthNodes
-                    localNode6 = localNode2 + numberOfCircumfrentialNodes*numberOfLengthNodes
-                    localNode7 = localNode3 + numberOfCircumfrentialNodes*numberOfLengthNodes
-                    localNode8 = localNode4 + numberOfCircumfrentialNodes*numberOfLengthNodes
+                    localNode3 = localNode1 + numberOfCircumferentialNodes
+                    localNode4 = localNode2 + numberOfCircumferentialNodes
+                    localNode5 = localNode1 + numberOfCircumferentialNodes*numberOfLengthNodes
+                    localNode6 = localNode2 + numberOfCircumferentialNodes*numberOfLengthNodes
+                    localNode7 = localNode3 + numberOfCircumferentialNodes*numberOfLengthNodes
+                    localNode8 = localNode4 + numberOfCircumferentialNodes*numberOfLengthNodes
                     localNodes = [localNode1,localNode2,localNode3,localNode4,localNode5,localNode6,localNode7,localNode8]
                     tricubicHermiteElements.NodesSet(elementNumber,localNodes)
                     trilinearLagrangeElements.NodesSet(elementNumber,localNodes)
@@ -323,9 +333,9 @@ class TubeGrower(object):
         #Initialise the fibre field
         for wallNodeIdx in range(1,numberOfWallNodes+1):
             for lengthNodeIdx in range(1,numberOfLengthNodes+1):
-                for circumfrentialNodeIdx in range(1,numberOfCircumfrentialNodes+1):
-                    nodeNumber = circumfrentialNodeIdx + (lengthNodeIdx-1)*numberOfCircumfrentialNodes + \
-                        (wallNodeIdx-1)*numberOfCircumfrentialNodes*numberOfLengthNodes
+                for circumferentialNodeIdx in range(1,numberOfCircumferentialNodes+1):
+                    nodeNumber = circumferentialNodeIdx + (lengthNodeIdx-1)*numberOfCircumferentialNodes + \
+                        (wallNodeIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
                     # Set the fibre angle
                     fibreField.ParameterSetUpdateNodeDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,
                                             1,iron.GlobalDerivativeConstants.NO_GLOBAL_DERIV,nodeNumber,1,fibreAngle)
@@ -662,9 +672,77 @@ class TubeGrower(object):
         self.growthCellMLStateField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         self.growthCellMLStateField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         
+    def growthRatesInterpolation(self,growthRateVariables):
+        numberOfCircumferentialElements = self.circumferentialElements
+        numberOfLengthElements = self.axialElements
+        numberOfLengthNodes = self.axialElements+1
+        numberOfCircumferentialNodes = numberOfCircumferentialElements
+        numberOfWallNodes = self.wallElements+1
+        numberOfWallElements = self.wallElements
+        numberOfNodes = numberOfCircumferentialElements*(numberOfLengthElements+1)*(numberOfWallElements+1)
+        numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
+        numberOfPoints = int(numberOfLengthNodes*numberOfCircumferentialNodes*numberOfWallElements)                                 
+        #numberOfPoints = 144      # 9*8*2
+        numberOfVariables = int((numberOfLengthElements/2 + 1)*(numberOfCircumferentialElements/2)*(numberOfWallElements)) 
+        #numberOfVariables = 40      # 5*4*2
+        # the purpose of this map from 40x3 points to 144 elements 
+        growthRatePoints = np.zeros((numberOfPoints,3))                                                                	# (8*9*2)*(3)
+        for i in range(1,numberOfWallElements+1):                                                                        # (1,2)
+            for j in range(1,int(numberOfLengthElements/2)+2):                                                            # (1,5)
+                for k in range(1, int(numberOfCircumferentialElements/2)+1):     	                            			# (1,9)
+                    m = (2*k-1)+(2*(j-1)*8)+(i-1)*8*9 - 1
+                    n = k+(j-1)*4+(i-1)*4*5 - 1
+                    growthRatePoints [m ,:] = growthRateVariables[n,:]
+        # ==================================================
+        # interpolate in the empty spots in 8x9x2x3         
+        # part 1 ... interpolate in half-filled lines ...                            
+        for j in range (int(numberOfPoints/numberOfCircumferentialElements)):                                                     # (0:9*2)
+            for i in range (int(numberOfCircumferentialElements/2)):                                                                   # (0:8)
+                if not (i == 3):
+                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8+2*i+2,:])/2
+                else:
+                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8,:])/2
+        # part 2 .... interpolate in empty lines 
+        for i in range (numberOfWallElements):
+            for k in range (int (numberOfLengthNodes/2)):
+                for j in range (numberOfCircumferentialNodes):
+                    pointNumber =  (2*k+1)*8 +  j  + i*72
+                    growthRatePoints[pointNumber,:] = (growthRatePoints[pointNumber-8,:] + growthRatePoints[pointNumber+8,:])/2
+        # ==================================================
+        growthElementRate = np.zeros((numberOfElements,3))                                                                                        # (8*9*2)*(3)
+        # map from points to elements 
+        elementNumber = 0
+        for wallElementIdx in range(1,numberOfWallElements+1):                                                                             # (1:2)
+            for lengthElementIdx in range(1,numberOfLengthElements+1):
+                for circumferentialElementIdx in range(1,numberOfCircumferentialElements+1):
+                    elementNumber = elementNumber + 1
+                    localNode1 = circumferentialElementIdx + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
+                    if circumferentialElementIdx == numberOfCircumferentialElements:
+                        localNode2 = 1 + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
+                    else:
+                        localNode2 = localNode1 + 1
+                    localNode3 = localNode1 + numberOfCircumferentialNodes
+                    localNode4 = localNode2 + numberOfCircumferentialNodes
+                    print (elementNumber, localNode1,localNode2,localNode3,localNode4)
+                    growthElementRate[elementNumber-1,0] = (growthRatePoints[localNode1-1,0] + growthRatePoints[localNode2-1,0] + growthRatePoints[localNode3-1,0] + growthRatePoints[localNode4-1,0])/4
+                    growthElementRate[elementNumber-1,1] = (growthRatePoints[localNode1-1,1] + growthRatePoints[localNode2-1,1] + growthRatePoints[localNode3-1,1] + growthRatePoints[localNode4-1,1])/4
+                    growthElementRate[elementNumber-1,2] = (growthRatePoints[localNode1-1,2] + growthRatePoints[localNode2-1,2] + growthRatePoints[localNode3-1,2] + growthRatePoints[localNode4-1,2])/4
+        return growthElementRate
         
     def solveAndGetSurfaceDescriptors(self,growthRate):
-        maxRate = growthRate.max()
+        numberOfCircumferentialElements = self.circumferentialElements
+        numberOfLengthElements = self.axialElements
+        numberOfLengthNodes = self.axialElements+1
+        numberOfCircumferentialNodes = numberOfCircumferentialElements
+        numberOfWallNodes = self.wallElements+1
+        numberOfWallElements = self.wallElements
+        numberOfNodes = numberOfCircumferentialElements*(numberOfLengthElements+1)*(numberOfWallElements+1)
+        numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
+
+        growthElementRate = np.zeros((numberOfElements,3))    
+        growthElementRateDivided = np.zeros((numberOfElements,3))    
+        growthElementRate = self.growthRatesInterpolation(growthRate)
+        maxRate = growthElementRate.max()
         exponent = maxRate/self.maxSolvebleRate
         if exponent>1.0:
             divi = np.power(10,int(np.log10(exponent))+1)
@@ -673,12 +751,9 @@ class TubeGrower(object):
             nsteps = 1
             divi = 1.0
         #print("Using ",nsteps," timesteps(s) maxgrowth rate is ",self.maxSolvebleRate," new maxrate is ",maxRate/divi," rates ",growthRate," new rates ",growthRate/divi)
-        fibreGrowthRate = growthRate[:,0]/divi
-        sheetGrowthRate = growthRate[:,1]/divi
-        normalGrowthRate = growthRate[:,2]/divi
-
+        growthElementRateDivided = growthElementRate/divi        
         # Initialise the parameters field
-        self.setupGrowthRates(fibreGrowthRate, sheetGrowthRate, normalGrowthRate)
+        self.setupGrowthRates(growthElementRateDivided)
         self.resetFieldsForNewSolution()
         time = 0.0
         timeIncrement = 1.0/nsteps
