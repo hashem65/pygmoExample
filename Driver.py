@@ -99,23 +99,7 @@ import pygmo as pg
 print ('out here 5')
 
 class GrowthOptimization(object):
-    print ('out here 6')
-
     precision = 1e4
-    numberOfLengthElements = 8 
-    numberOfCircumferentialElements = 8 
-    numberOfWallElements = 2
-    numberOfLengthNodes = numberOfLengthElements + 1
-    numberOfCircumferentialNodes = numberOfCircumferentialElements
-    numberOfWallNodes = numberOfWallElements + 1
-    numberOfElements = numberOfLengthElements*numberOfCircumferentialElements*numberOfWallElements
-    numberOfNodes = numberOfLengthNodes*numberOfCircumferentialNodes*numberOfWallNodes
-    division = 2                                                                                                                       # division = 4    
-    numberOfPoints = int((numberOfLengthNodes)*(numberOfCircumferentialNodes)*(numberOfWallElements))                                  # 9*8*2
-    numberOfPoints = 144  
-    numberOfVariables = int((numberOfLengthElements/division + 1)*(numberOfCircumferentialElements/division)*(numberOfWallElements))   # 5*4*2
-    print ('out here 7')
-
     def __init__(self):
         growthShape = np.zeros((40,3))
         self.grshape = growthShape.shape
@@ -123,60 +107,6 @@ class GrowthOptimization(object):
         #self.targetCoordinates = findDeformedCoordinates(growthRate)
     print ('out here 8')
 
-    def growthRates(self,growthRateVariables):
-        # generate some random numbers as the objective variables in a 4x5x2x3 net  
-        #growthRateVariables = np.array((self.numberOfVariables,3))                                                                         # (8*9*2)*(3)
-        # ==================================================
-        # map from 4x5x2x3 points to 8x9x2x3 points 
-        #growthRateVariables = np.reshape(random_floats,(numberOfVariables,3))   
-        growthRatePoints = np.zeros((self.numberOfPoints,3))                                                                         		# (8*9*2)*(3)
-        #print ('self.numberOfPoints', self.numberOfPoints)
-        #print ('shape 1', growthRatePoints.shape )
-        #print ('shape 2', growthRateVariables.shape )
-        for i in range(1,self.numberOfWallElements+1):                                                                                      # (1,2)
-            for j in range(1,int(self.numberOfLengthElements/self.division)+2):                                                             # (1,10)
-                for k in range(1, int(self.numberOfCircumferentialElements/self.division)+1):     	                            			# (1,9)
-                    m = (2*k-1)+(2*(j-1)*8)+(i-1)*8*9 - 1
-                    n = k+(j-1)*4+(i-1)*4*5 - 1
-                    growthRatePoints [m ,:] = growthRateVariables[n,:]
-
-        # ==================================================
-        # interpolate in the empty spots in 8x9x2x3         
-        # part 1 ... interpolate in half-filled lines ...                            
-        for j in range (int(self.numberOfPoints/self.numberOfCircumferentialElements)):                                                     # (0:9*2)
-            for i in range (int(self.numberOfCircumferentialElements/2)):                                                                   # (0:8)
-                if not (i == 3):
-                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8+2*i+2,:])/2
-                else:
-                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8,:])/2
-
-        # part 2 .... interpolate in empty lines 
-        for i in range (self.numberOfWallElements):
-            for k in range (int (self.numberOfLengthNodes/2)):
-                for j in range (self.numberOfCircumferentialNodes):
-                    pointNumber =  (2*k+1)*8 +  j  + i*72
-                    growthRatePoints[pointNumber,:] = (growthRatePoints[pointNumber-8,:] + growthRatePoints[pointNumber+8,:])/2
-
-        # ==================================================
-        growthRate = np.zeros((self.numberOfElements,3))                                                                                        # (8*9*2)*(3)
-        # map from points to elements 
-        elementNumber = 0
-        for wallElementIdx in range(1,self.numberOfWallElements+1):                                                                             # (1:2)
-            for lengthElementIdx in range(1,self.numberOfLengthElements+1):
-                for circumferentialElementIdx in range(1,self.numberOfCircumferentialElements+1):
-                    elementNumber = elementNumber + 1
-                    localNode1 = circumferentialElementIdx + (lengthElementIdx-1)*self.numberOfCircumferentialNodes + (wallElementIdx-1)*self.numberOfCircumferentialNodes*self.numberOfLengthNodes
-                    if circumferentialElementIdx == self.numberOfCircumferentialElements:
-                        localNode2 = 1 + (lengthElementIdx-1)*self.numberOfCircumferentialNodes + (wallElementIdx-1)*self.numberOfCircumferentialNodes*self.numberOfLengthNodes
-                    else:
-                        localNode2 = localNode1 + 1
-                    localNode3 = localNode1 + self.numberOfCircumferentialNodes
-                    localNode4 = localNode2 + self.numberOfCircumferentialNodes
-                    print (elementNumber, localNode1,localNode2,localNode3,localNode4)
-                    growthRate[elementNumber-1,0] = (growthRatePoints[localNode1-1,0] + growthRatePoints[localNode2-1,0] + growthRatePoints[localNode3-1,0] + growthRatePoints[localNode4-1,0])/4
-                    growthRate[elementNumber-1,1] = (growthRatePoints[localNode1-1,1] + growthRatePoints[localNode2-1,1] + growthRatePoints[localNode3-1,1] + growthRatePoints[localNode4-1,1])/4
-                    growthRate[elementNumber-1,2] = (growthRatePoints[localNode1-1,2] + growthRatePoints[localNode2-1,2] + growthRatePoints[localNode3-1,2] + growthRatePoints[localNode4-1,2])/4
-        return growthRate
     print ('out here 9')
 
     def checkSolution(self,key):
@@ -216,8 +146,8 @@ class GrowthOptimization(object):
             print ('x shape',x.shape)
             xRates = x.reshape(self.grshape)			 # a = np.arange(6).reshape((3,2))    >>> a  array([[0, 1],[2, 3],[4, 5]])
             print ('xRate shape',xRates.shape)
-            xElements = self.growthRates(xRates)       
-            coordinates = findDeformedCoordinates(xElements)
+            #xElements = self.growthRates(xRates)       
+            coordinates = findDeformedCoordinates(xRates)
             f = np.sum(np.linalg.norm(coordinates-targetCoordinates,axis=1))
             self.addSolution(x, f)
         print('Rate ',x,' objective ',f)
@@ -225,7 +155,7 @@ class GrowthOptimization(object):
     print ('out here 11')
 
     def get_bounds(self):
-        return ([-0.1]*(self.numberOfVariables*3),[0.15]*(self.numberOfVariables*3))
+        return ([-0.15]*(40*3),[0.25]*(40*3))
     
 runParallel = False
 import random
