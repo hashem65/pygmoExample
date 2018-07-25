@@ -7,15 +7,18 @@ from __future__ import print_function
 import numpy as np
 from opencmiss.iron import iron
 import exfile
-        
+
+humphreyModel = False
+    
 class TubeGrower(object):
     '''
     classdocs
     '''
-    c1 = 3.2
-    c2 = 0.39
-    c3 = 11.0
-    c4 = 0.49
+    if (humphreyModel):
+        c1 = 3.2
+        c2 = 0.39
+        c3 = 11.0
+        c4 = 0.49
     maxSolvebleRate = 0.1
     
     def __init__(self, circumferentialElements,axialElements,wallElements,discret=10,length=2.0,innerRadius=1.5,outerRadius=2.0,fixBottom=True,fixTop=False, stage=0):
@@ -100,7 +103,6 @@ class TubeGrower(object):
         exnode = exfile.Exnode("mesh" + str(stageNumber) + "-8x8.part0.exnode")       # considered from 0-24   stageNumber+2 is the next stage ...
         derivativeValues = []
         #adding coordinates of the nodes 
-        geometricField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         #adding dervatives of the nodes 
         for node_num in range(1, exnode.num_nodes + 1):
             version = 1
@@ -124,6 +126,7 @@ class TubeGrower(object):
                 component_name = ["x", "y", "z"][component - 1]
                 derivativeValues = exnode.node_values("Coordinate", component_name, node_num)
                 geometricField.ParameterSetUpdateNode(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES, version, derivative, node_num, component, derivativeValues[4])
+        geometricField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         geometricField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
 
 		
@@ -476,8 +479,9 @@ class TubeGrower(object):
         constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E22")
         constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E23")
         constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E33")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c1")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c2")
+        if (humphreyModel):
+            constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c1")
+            constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c2")
         # Flag the CellML variables that OpenCMISS will obtain
         constitutiveCellML.VariableSetAsWanted(constitutiveCellMLIdx,"equations/Tdev11")
         constitutiveCellML.VariableSetAsWanted(constitutiveCellMLIdx,"equations/Tdev12")
@@ -529,32 +533,32 @@ class TubeGrower(object):
                                                        constitutiveCellMLParametersField)
         constitutiveCellMLParametersField.VariableLabelSet(iron.FieldVariableTypes.U,"ConstitutiveParameters")
         constitutiveCellML.ParametersFieldCreateFinish()
-        
-        # Set up the materials constants
-        c1ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c1")
-        c2ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c2")
+        if (humphreyModel):
+            # Set up the materials constants
+            c1ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c1")
+            c2ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c2")
 
-        #c3ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c3")
-        #print "could succefully get the rates ... "
+            #c3ComponentNumber = constitutiveCellML.FieldComponentGet(constitutiveCellMLIdx,iron.CellMLFieldTypes.PARAMETERS,"equations/c3")
+            #print "could succefully get the rates ... "
 
-        for gaussPointNumber in range (1,27+1):
-            for elementNumber in range (1,64+1):
-                constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+            for gaussPointNumber in range (1,27+1):
+                for elementNumber in range (1,64+1):
+                    constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
                                 iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,c1ComponentNumber,self.c1)
-                constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                    constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
                                 iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,c2ComponentNumber,self.c2)
 
-        #constitutiveCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
-        #constitutiveCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
+            #constitutiveCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
+            #constitutiveCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
 
-        for gaussPointNumber in range (1,27+1):
-            for elementNumber in range (64+1,128+1):
-                constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+            for gaussPointNumber in range (1,27+1):
+                for elementNumber in range (64+1,128+1):
+                    constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
                                 iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,c1ComponentNumber,self.c3)
-                constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                    constitutiveCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
                                 iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,c2ComponentNumber,self.c4)
-        constitutiveCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
-        constitutiveCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
 
         # Create the CELL intermediate field
         constitutiveCellMLIntermediateField = iron.Field()
@@ -723,7 +727,7 @@ class TubeGrower(object):
                         localNode2 = localNode1 + 1
                     localNode3 = localNode1 + numberOfCircumferentialNodes
                     localNode4 = localNode2 + numberOfCircumferentialNodes
-                    print (elementNumber, localNode1,localNode2,localNode3,localNode4)
+                    #print (elementNumber, localNode1,localNode2,localNode3,localNode4)
                     growthElementRate[elementNumber-1,0] = (growthRatePoints[localNode1-1,0] + growthRatePoints[localNode2-1,0] + growthRatePoints[localNode3-1,0] + growthRatePoints[localNode4-1,0])/4
                     growthElementRate[elementNumber-1,1] = (growthRatePoints[localNode1-1,1] + growthRatePoints[localNode2-1,1] + growthRatePoints[localNode3-1,1] + growthRatePoints[localNode4-1,1])/4
                     growthElementRate[elementNumber-1,2] = (growthRatePoints[localNode1-1,2] + growthRatePoints[localNode2-1,2] + growthRatePoints[localNode3-1,2] + growthRatePoints[localNode4-1,2])/4
