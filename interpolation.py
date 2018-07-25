@@ -91,7 +91,7 @@ for wallElementIdx in range(1,numberOfWallElements+1):                          
                 localNode2 = localNode1 + 1
             localNode3 = localNode1 + numberOfCircumferentialNodes
             localNode4 = localNode2 + numberOfCircumferentialNodes
-            growthRate[elementNumber-1,:] = (growthRatePoints[localNode1-1,:] + growthRatePoints[localNode1-1,:] + growthRatePoints[localNode1-1,:] + growthRatePoints[localNode1-1,:])/4
+            growthRate[elementNumber-1,:] = (growthRatePoints[localNode1-1,:] + growthRatePoints[localNode2-1,:] + growthRatePoints[localNode3-1,:] + growthRatePoints[localNode4-1,:])/4
 print ('\n'*12)
 print ('length Matrix growth rates=',  len(growthRate))
 print ('\n'*12)
