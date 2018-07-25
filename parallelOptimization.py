@@ -29,6 +29,8 @@ if __name__ == '__main__':
     growthLogic = TubeGrower(circumferentialElements,axialElements,wallElements,discret,length,innerRadius,outerRadius,fixBottom,fixTop,stage)
     growthLogic.setupProblem()
     
+	# write out the files ... 
+	
     try:
         targetCoordinates = growthLogic.solveAndGetSurfaceDescriptors(growthParameters)
         result = {'nodePositions':targetCoordinates.tolist()}
