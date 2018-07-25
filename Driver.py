@@ -5,7 +5,7 @@ Created on 09/06/2018
 '''
 from __future__ import print_function
 import numpy as np
-from opencmiss.iron import iron
+
 import json,os,sys
 import traceback
 from io import StringIO
@@ -20,7 +20,6 @@ try:
     size = comm.Get_size()
 except:
     raise ImportError('mpi4py is required for parallelization')
-print ('out here 1')
 my_env = os.environ.copy()
 '''
 Even when launching iron through a subprocess,
@@ -44,26 +43,29 @@ try:
     del my_env['PMI_FD']
 except:
     pass
-print ('out here 2')
-from Growth import TubeGrower
-growthParameters = np.zeros((128,3))                                                                                        # (8*9*2)*(3)
-circumferentialElements=8
-axialElements=8
-wallElements=2
-discret=10
-length=2.0
-innerRadius=1.5
-outerRadius=2.0
-fixBottom=True
-fixTop = False
-stage = 2
-growthLogic = TubeGrower(circumferentialElements,axialElements,wallElements,discret,length,innerRadius,outerRadius,fixBottom,fixTop,stage)
-growthLogic.setupProblem()
-targetCoordinates = growthLogic.solveAndGetSurfaceDescriptors(growthParameters)
-#result = {'nodePositions':targetCoordinates.tolist()}
-#finaltargetCoordinates = np.array(result[u'nodePositions'])
-print (targetCoordinates)
-print ('out here 3')
+
+
+
+def findTargetCoordinates(rates):
+    try:
+        p = Popen(['python','readingTargetMesh.py'],stdin=PIPE,stderr=PIPE,env=my_env)
+        inputData = dict()
+        inputData['optmin'] = rates.tolist() 
+        subin = json.dumps(inputData)
+        #print('##Initializing problem for parameters %s ' % (' ,'.join(map(str,rates.tolist()))))
+        _,perr = p.communicate(str.encode(subin))
+        p.wait()
+        perr = perr.decode()
+        #Ensure that we are starting at a json prefix
+        ps = perr.index('POSResSTART') + 11
+        pe = perr.index('POSResEND')
+        result = json.loads(perr[ps:pe])
+        if u'error' in result:
+            raise ValueError(result[u'error'])
+        return np.array(result[u'nodePositions'])
+    except:
+        traceback.print_exc(file=sys.stdout)
+
 
 def findDeformedCoordinates(rates):
     try:
@@ -85,8 +87,6 @@ def findDeformedCoordinates(rates):
     except:
         traceback.print_exc(file=sys.stdout)
 
-print ('out here 4')
-
 
 dictionaryLoc = 'solutionsReal.sql'
 solutionsDictionary = SqliteDict(dictionaryLoc, autocommit=True)
@@ -96,18 +96,15 @@ def getSolutionsDictionary():
 
 import random
 import pygmo as pg
-print ('out here 5')
 
 class GrowthOptimization(object):
-    precision = 1e4
+    precision = 4e1
     def __init__(self):
         growthShape = np.zeros((40,3))
         self.grshape = growthShape.shape
         #print ('self.grshape = ', self.grshape)
-        #self.targetCoordinates = findDeformedCoordinates(growthRate)
-    print ('out here 8')
+        self.targetCoordinates = findTargetCoordinates(growthShape)
 
-    print ('out here 9')
 
     def checkSolution(self,key):
         '''
@@ -136,23 +133,21 @@ class GrowthOptimization(object):
         solutions = getSolutionsDictionary()
         for k,v in solutions.items():
             print(k," ",v)
-    print ('out here 10')
  
     def fitness(self,x):
         f = self.checkSolution(x)
         
         if f is None:
             #exnode = exfile.Exnode("mesh" + str(stageNumber) + "-8x8.part0.exnode")       # considered from 0-24   stageNumber+2 is the next stage ... 
-            print ('x shape',x.shape)
+            #print ('x shape',x.shape)
             xRates = x.reshape(self.grshape)			 # a = np.arange(6).reshape((3,2))    >>> a  array([[0, 1],[2, 3],[4, 5]])
-            print ('xRate shape',xRates.shape)
-            #xElements = self.growthRates(xRates)       
+            #print ('xRate shape',xRates.shape)
+            intRates = (np.array(xRates)*self.precision).astype('int')
             coordinates = findDeformedCoordinates(xRates)
-            f = np.sum(np.linalg.norm(coordinates-targetCoordinates,axis=1))
+            f = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1)) + np.sum(np.linalg.norm(intRates,axis=1))*1e7
             self.addSolution(x, f)
         print('Rate ',x,' objective ',f)
         return [f]
-    print ('out here 11')
 
     def get_bounds(self):
         return ([-0.15]*(40*3),[0.25]*(40*3))
@@ -213,14 +208,12 @@ class MonteCarlo(pg.algorithm):
 
     def human_readable_extra(self):
         return "n_iter=" + str(self.__n_iter)
-print ('out here 12')
 
 if __name__ == '__main__':
     gp = GrowthOptimization()
     prob = pg.problem(gp)
     algo = pg.algorithm(pg.pso(gen = 200))
     #algo = MonteCarlo(100)
-    print ('out here 13')
     try:
         if not runParallel:
             pop = pg.population(prob,20)
