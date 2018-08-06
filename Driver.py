@@ -98,7 +98,7 @@ import random
 import pygmo as pg
 
 class GrowthOptimization(object):
-    precision = 4e1
+    precision = 1e5
     def __init__(self):
         growthShape = np.zeros((40,3))
         self.grshape = growthShape.shape
@@ -134,6 +134,27 @@ class GrowthOptimization(object):
         for k,v in solutions.items():
             print(k," ",v)
  
+
+    def fitness(self,x):
+        f = self.checkSolution(x)
+        if f is None:
+            try: 
+                try:
+                    coordinates = findDeformedCoordinates(x.reshape(self.grshape))
+                    f = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1))
+                    self.addSolution(x, f)
+                except:
+                    f= 4e8
+                    self.addSolution(x, f)
+                if (f < 2e6):
+                    print ('Rate ',x,' objective ',f)
+                    sys.exit()
+            except ValueError:
+                print ("Oops!  That was no valid number.  Try again...") 		
+        # print('Rate ',x,' objective ',f)
+        return [f]
+
+
     def fitness(self,x):
         f = self.checkSolution(x)
         
@@ -143,10 +164,14 @@ class GrowthOptimization(object):
             xRates = x.reshape(self.grshape)			 # a = np.arange(6).reshape((3,2))    >>> a  array([[0, 1],[2, 3],[4, 5]])
             #print ('xRate shape',xRates.shape)
             intRates = (np.array(xRates)*self.precision).astype('int')
-            coordinates = findDeformedCoordinates(xRates)
-            f = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1)) + np.sum(np.linalg.norm(intRates,axis=1))*1e7
-            self.addSolution(x, f)
-        print('Rate ',x,' objective ',f)
+            try:
+                coordinates = findDeformedCoordinates(xRates)
+                f = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1)) + np.sum(np.linalg.norm(intRates,axis=1))*1e9
+                self.addSolution(x, f)
+            except:
+                f= 1e16
+                self.addSolution(x, f)            
+        #print('Rate ',x,' objective ',f)
         return [f]
 
     def get_bounds(self):
@@ -212,7 +237,7 @@ class MonteCarlo(pg.algorithm):
 if __name__ == '__main__':
     gp = GrowthOptimization()
     prob = pg.problem(gp)
-    algo = pg.algorithm(pg.pso(gen = 200))
+    algo = pg.algorithm(pg.pso(gen = 300))
     #algo = MonteCarlo(100)
     try:
         if not runParallel:
