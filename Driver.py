@@ -135,24 +135,6 @@ class GrowthOptimization(object):
             print(k," ",v)
  
 
-    def fitness(self,x):
-        f = self.checkSolution(x)
-        if f is None:
-            try: 
-                try:
-                    coordinates = findDeformedCoordinates(x.reshape(self.grshape))
-                    f = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1))
-                    self.addSolution(x, f)
-                except:
-                    f= 4e8
-                    self.addSolution(x, f)
-                if (f < 2e6):
-                    print ('Rate ',x,' objective ',f)
-                    sys.exit()
-            except ValueError:
-                print ("Oops!  That was no valid number.  Try again...") 		
-        # print('Rate ',x,' objective ',f)
-        return [f]
 
 
     def fitness(self,x):
