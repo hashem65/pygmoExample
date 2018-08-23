@@ -7,6 +7,8 @@ from __future__ import print_function
 import numpy as np
 from opencmiss.iron import iron
 import exfile
+from scipy.interpolate import griddata
+import math
 
 humphreyModel = False
     
@@ -81,19 +83,23 @@ class TubeGrower(object):
         numberOfCircumferentialElements = self.circumferentialElements
         numberOfLengthElements = self.axialElements
         numberOfWallElements = self.wallElements
+        numberOfGaussXi = 3 
         numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
         growthCellMLParametersField = self.growthCellMLParametersField
         #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,1,fibreGrowthRate[0])
         #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,2,sheetGrowthRate[0])
         #growthCellMLParametersField.ComponentValuesInitialiseDP(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES,3,normalGrowthRate[0])
         for elementNumber in range (1, numberOfElements+1):
-            for gaussPointNumber in range (1,27+1):
-                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
-                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,1,growthElementRate[elementNumber-1,0])
-                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
-                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,2,growthElementRate[elementNumber-1,1])
-                growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
-                                iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,3,growthElementRate[elementNumber-1,2])
+            for xiIdx3 in range(1,numberOfGaussXi+1):
+                for xiIdx2 in range(1,numberOfGaussXi+1):
+                    for xiIdx1 in range(1,numberOfGaussXi+1):
+                        gaussPointNumber = xiIdx1 + (xiIdx2-1)*numberOfGaussXi + (xiIdx3-1)*numberOfGaussXi*numberOfGaussXi
+                        growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                        iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,1,growthElementRate[elementNumber-1, xiIdx1-1, xiIdx2-1,xiIdx3-1,0])
+                        growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                        iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,2,growthElementRate[elementNumber-1, xiIdx1-1, xiIdx2-1,xiIdx3-1,1])
+                        growthCellMLParametersField.ParameterSetUpdateGaussPointDP(iron.FieldVariableTypes.U,
+                                        iron.FieldParameterSetTypes.VALUES,gaussPointNumber,elementNumber,3,growthElementRate[elementNumber-1, xiIdx1-1, xiIdx2-1,xiIdx3-1,2])
         growthCellMLParametersField.ParameterSetUpdateStart(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         growthCellMLParametersField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)    
 
@@ -425,7 +431,7 @@ class TubeGrower(object):
         equations.outputType = iron.EquationsOutputTypes.NONE
         # Finish creating the equations
         equationsSet.EquationsCreateFinish()
-        
+       
         # Set up the growth CellML model
         growthCellML = iron.CellML()
         growthCellML.CreateStart(growthCellMLUserNumber,region)
@@ -473,12 +479,12 @@ class TubeGrower(object):
         constitutiveCellML.CreateStart(constitutiveCellMLUserNumber,region)
         constitutiveCellMLIdx = constitutiveCellML.ModelImport("mooneyrivlin.cellml")
         # Flag the CellML variables that OpenCMISS will supply
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E11")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E12")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E13")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E22")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E23")
-        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/E33")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C11")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C12")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C13")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C22")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C23")
+        constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/C33")
         if (humphreyModel):
             constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c1")
             constitutiveCellML.VariableSetAsKnown(constitutiveCellMLIdx,"equations/c2")
@@ -494,17 +500,17 @@ class TubeGrower(object):
         # Create CellML <--> OpenCMISS field maps
         constitutiveCellML.FieldMapsCreateStart()
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,1,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E11",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C11",iron.FieldParameterSetTypes.VALUES)
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,2,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E12",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C12",iron.FieldParameterSetTypes.VALUES)
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,3,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E13",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C13",iron.FieldParameterSetTypes.VALUES)
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,4,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E22",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C22",iron.FieldParameterSetTypes.VALUES)
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,5,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E23",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C23",iron.FieldParameterSetTypes.VALUES)
         constitutiveCellML.CreateFieldToCellMLMap(dependentField,iron.FieldVariableTypes.U1,6,iron.FieldParameterSetTypes.VALUES,
-            constitutiveCellMLIdx,"equations/E33",iron.FieldParameterSetTypes.VALUES)
+            constitutiveCellMLIdx,"equations/C33",iron.FieldParameterSetTypes.VALUES)
         
         constitutiveCellML.CreateCellMLToFieldMap(constitutiveCellMLIdx,"equations/Tdev11",iron.FieldParameterSetTypes.VALUES,
             dependentField,iron.FieldVariableTypes.U2,1,iron.FieldParameterSetTypes.VALUES)
@@ -677,6 +683,10 @@ class TubeGrower(object):
         self.growthCellMLStateField.ParameterSetUpdateFinish(iron.FieldVariableTypes.U,iron.FieldParameterSetTypes.VALUES)
         
     def growthRatesInterpolation(self,growthRateVariables):
+        layers = 2  #  can be 1 or 2              1 for only cardiac muscle  and  2  for cardiac muscle and cardiac jelly
+        division = 4     # can be 2 or 4              2 for coarse meshgrid 18 vars and 4 for refine meshgrid with 36 vars 
+        numberOfCircumferentialPoints = division + 1
+        numberOfLongitudinalPoints = division + 1 
         numberOfCircumferentialElements = self.circumferentialElements
         numberOfLengthElements = self.axialElements
         numberOfLengthNodes = self.axialElements+1
@@ -685,53 +695,126 @@ class TubeGrower(object):
         numberOfWallElements = self.wallElements
         numberOfNodes = numberOfCircumferentialElements*(numberOfLengthElements+1)*(numberOfWallElements+1)
         numberOfElements = numberOfCircumferentialElements*numberOfLengthElements*numberOfWallElements
-        numberOfPoints = int(numberOfLengthNodes*numberOfCircumferentialNodes*numberOfWallElements)                                 
-        #numberOfPoints = 144      # 9*8*2
-        numberOfVariables = int((numberOfLengthElements/2 + 1)*(numberOfCircumferentialElements/2)*(numberOfWallElements)) 
-        #numberOfVariables = 40      # 5*4*2
-        # the purpose of this map from 40x3 points to 144 elements 
-        growthRatePoints = np.zeros((numberOfPoints,3))                                                                	# (8*9*2)*(3)
-        for i in range(1,numberOfWallElements+1):                                                                        # (1,2)
-            for j in range(1,int(numberOfLengthElements/2)+2):                                                            # (1,5)
-                for k in range(1, int(numberOfCircumferentialElements/2)+1):     	                            			# (1,9)
-                    m = (2*k-1)+(2*(j-1)*8)+(i-1)*8*9 - 1
-                    n = k+(j-1)*4+(i-1)*4*5 - 1
-                    growthRatePoints [m ,:] = growthRateVariables[n,:]
-        # ==================================================
-        # interpolate in the empty spots in 8x9x2x3         
-        # part 1 ... interpolate in half-filled lines ...                            
-        for j in range (int(numberOfPoints/numberOfCircumferentialElements)):                                                     # (0:9*2)
-            for i in range (int(numberOfCircumferentialElements/2)):                                                                   # (0:8)
-                if not (i == 3):
-                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8+2*i+2,:])/2
-                else:
-                    growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8,:])/2
-        # part 2 .... interpolate in empty lines 
-        for i in range (numberOfWallElements):
-            for k in range (int (numberOfLengthNodes/2)):
-                for j in range (numberOfCircumferentialNodes):
-                    pointNumber =  (2*k+1)*8 +  j  + i*72
-                    growthRatePoints[pointNumber,:] = (growthRatePoints[pointNumber-8,:] + growthRatePoints[pointNumber+8,:])/2
-        # ==================================================
-        growthElementRate = np.zeros((numberOfElements,3))                                                                                        # (8*9*2)*(3)
-        # map from points to elements 
+        grid_x, grid_y = np.mgrid[0:1:1000j, 0:1:1000j]
+        # distribute the rates to the points 
+
+        values = np.zeros(((division+1)*(division+1),3,layers)) 
+        for k in range (layers):
+            for m in range (division+1):
+                for n in range (division):
+                    values[m*n+n,:,k] =  growthRateVariables [(division+1)*division*k+m*n+n,:]		
+        # there needs to be a symmetry as of unrolling cylinder 	
+        #print (values)
+        for j in range (division+1):
+            values[(division+1)*j+division,:,:] = values[(division+1)*j,:,:] 
+        values1 = np.zeros(((division+1)*(division+1),3))
+        values1 [:,:] = values [:,:,0]
+        if (layers == 2 ):
+            values2 = np.zeros(((division+1)*(division+1),3))
+            values2 [:,:] = values [:,:,1]
+        #print (values1)
+        #print (values2)
+
+        # number of points
+        numberOfPoints = (division + 1)*(division + 1)
+        points = np.zeros((numberOfPoints,2))
+        if (division == 4):
+            points[:,0] = 0,0,0,0,0,0.25,0.25,0.25,0.25,0.25,0.5,0.5,0.5,0.5,0.5,0.75,0.75,0.75,0.75,0.75,1,1,1,1,1
+            points[:,1] = 0,0.25,0.5,0.75,1,0,0.25,0.5,0.75,1,0,0.25,0.5,0.75,1,0,0.25,0.5,0.75,1,0,0.25,0.5,0.75,1
+        elif (division == 2):
+            points[:,0] = 0,0,0,0.5,0.5,0.5,1,1,1
+            points[:,1] = 0,0.5,1,0,0.5,1,0,0.5,1
+
+        grid_z00 = griddata(points, values1[:,0], (grid_x, grid_y), method='cubic')
+        grid_z10 = griddata(points, values1[:,1], (grid_x, grid_y), method='cubic')
+        grid_z20 = griddata(points, values1[:,2], (grid_x, grid_y), method='cubic')
+        #grid_z30 = griddata(points, values1[:,3], (grid_x, grid_y), method='cubic')
+        if (layers == 2):
+            grid_z01 = griddata(points, values2[:,0], (grid_x, grid_y), method='cubic')
+            grid_z11 = griddata(points, values2[:,1], (grid_x, grid_y), method='cubic')
+            grid_z21 = griddata(points, values2[:,2], (grid_x, grid_y), method='cubic')
+            #grid_z31 = griddata(points, values2[:,3], (grid_x, grid_y), method='cubic')
+        # the location of gauss points  in [-1,1]  -0.577, 0 , 0.577
+        # the location of gauss points  in [0,1]  (1-0.577)/2, 0.5 , (1+0.577)/2   ===>  0.211, 0.5, 0.789  or 0.21 , 0.5 , 0.79
+
         elementNumber = 0
-        for wallElementIdx in range(1,numberOfWallElements+1):                                                                             # (1:2)
-            for lengthElementIdx in range(1,numberOfLengthElements+1):
-                for circumferentialElementIdx in range(1,numberOfCircumferentialElements+1):
-                    elementNumber = elementNumber + 1
-                    localNode1 = circumferentialElementIdx + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
-                    if circumferentialElementIdx == numberOfCircumferentialElements:
-                        localNode2 = 1 + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
-                    else:
-                        localNode2 = localNode1 + 1
-                    localNode3 = localNode1 + numberOfCircumferentialNodes
-                    localNode4 = localNode2 + numberOfCircumferentialNodes
-                    #print (elementNumber, localNode1,localNode2,localNode3,localNode4)
-                    growthElementRate[elementNumber-1,0] = (growthRatePoints[localNode1-1,0] + growthRatePoints[localNode2-1,0] + growthRatePoints[localNode3-1,0] + growthRatePoints[localNode4-1,0])/4
-                    growthElementRate[elementNumber-1,1] = (growthRatePoints[localNode1-1,1] + growthRatePoints[localNode2-1,1] + growthRatePoints[localNode3-1,1] + growthRatePoints[localNode4-1,1])/4
-                    growthElementRate[elementNumber-1,2] = (growthRatePoints[localNode1-1,2] + growthRatePoints[localNode2-1,2] + growthRatePoints[localNode3-1,2] + growthRatePoints[localNode4-1,2])/4
-        return growthElementRate
+        elementOrigin = []
+        gaussPointsLocations = [0.21 , 0.5 , 0.79]
+        interpolatedRates = np.zeros((numberOfElements,3,3,3,3))
+        for numLayers in range (layers):
+            for lengthElems in range (8):
+                for circumElems in range (8):
+                    elementNumber = numLayers*64 + lengthElems*8 + circumElems
+                    for xi1 in range (3):
+                        for xi2 in range (3):
+                            for xi3 in range (3):
+                                s = circumElems/8 + gaussPointsLocations[xi1]/8
+                                t = lengthElems/8 + gaussPointsLocations[xi2]/8
+                                p = gaussPointsLocations[xi3]
+                                if (layers == 1 ):
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,0] = grid_z00[int(1000*t) , int(1000*s)]
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,1] = grid_z10[int(1000*t) , int(1000*s)] 
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,2] = grid_z20[int(1000*t) , int(1000*s)]
+                                elif (layers == 2 ):
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,0] = ((1-p)*(grid_z00[int(1000*t),int(1000*s)])  +  p*(grid_z00[int(1000*t),
+                                                int(1000*s)] + grid_z01[int(1000*t) , int(1000*s)])/2)*math.fabs(layers-1)  +  (p*(grid_z01[int(1000*t),
+                                                int(1000*s)])  +  (1-p)*(grid_z00[int(1000*t),int(1000*s)] + grid_z01[int(1000*t) , int(1000*s)])/2)*math.fabs(layers)
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,1] = ((1-p)*(grid_z10[int(1000*t),int(1000*s)])  +  p*(grid_z10[int(1000*t),
+                                                int(1000*s)] + grid_z11[int(1000*t) , int(1000*s)])/2)*math.fabs(layers-1)  +  (p*(grid_z11[int(1000*t),
+                                                int(1000*s)])  +  (1-p)*(grid_z10[int(1000*t),int(1000*s)] + grid_z11[int(1000*t) , int(1000*s)])/2)*math.fabs(layers)
+                                    interpolatedRates[elementNumber, xi1, xi2,xi3,2] = ((1-p)*(grid_z20[int(1000*t),int(1000*s)])  +  p*(grid_z20[int(1000*t),
+                                                int(1000*s)] + grid_z21[int(1000*t) , int(1000*s)])/2)*math.fabs(layers-1)  +  (p*(grid_z21[int(1000*t),
+                                                int(1000*s)])  +  (1-p)*(grid_z20[int(1000*t),int(1000*s)] + grid_z21[int(1000*t) , int(1000*s)])/2)*math.fabs(layers)   
+
+
+        # numberOfPoints = int(numberOfLengthNodes*numberOfCircumferentialNodes*numberOfWallElements)                                 
+        # #numberOfPoints = 144      # 9*8*2
+        # numberOfVariables = int((numberOfLengthElements/2 + 1)*(numberOfCircumferentialElements/2)*(numberOfWallElements)) 
+        # #numberOfVariables = 40      # 5*4*2
+        # # the purpose of this map from 40x3 points to 144 elements 
+        # growthRatePoints = np.zeros((numberOfPoints,3))                                                                	# (8*9*2)*(3)
+        # for i in range(1,numberOfWallElements+1):                                                                        # (1,2)
+            # for j in range(1,int(numberOfLengthElements/2)+2):                                                            # (1,5)
+                # for k in range(1, int(numberOfCircumferentialElements/2)+1):     	                            			# (1,9)
+                    # m = (2*k-1)+(2*(j-1)*8)+(i-1)*8*9 - 1
+                    # n = k+(j-1)*4+(i-1)*4*5 - 1
+                    # growthRatePoints [m ,:] = growthRateVariables[n,:]
+        # # ==================================================
+        # # interpolate in the empty spots in 8x9x2x3         
+        # # part 1 ... interpolate in half-filled lines ...                            
+        # for j in range (int(numberOfPoints/numberOfCircumferentialElements)):                                                     # (0:9*2)
+            # for i in range (int(numberOfCircumferentialElements/2)):                                                                   # (0:8)
+                # if not (i == 3):
+                    # growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8+2*i+2,:])/2
+                # else:
+                    # growthRatePoints [j*8+2*i+1,:] = (growthRatePoints [j*8+2*i,:] + growthRatePoints [j*8,:])/2
+        # # part 2 .... interpolate in empty lines 
+        # for i in range (numberOfWallElements):
+            # for k in range (int (numberOfLengthNodes/2)):
+                # for j in range (numberOfCircumferentialNodes):
+                    # pointNumber =  (2*k+1)*8 +  j  + i*72
+                    # growthRatePoints[pointNumber,:] = (growthRatePoints[pointNumber-8,:] + growthRatePoints[pointNumber+8,:])/2
+        # # ==================================================
+        # growthElementRate = np.zeros((numberOfElements,3))                                                                                        # (8*9*2)*(3)
+        # # map from points to elements 
+        # elementNumber = 0
+        # for wallElementIdx in range(1,numberOfWallElements+1):                                                                             # (1:2)
+            # for lengthElementIdx in range(1,numberOfLengthElements+1):
+                # for circumferentialElementIdx in range(1,numberOfCircumferentialElements+1):
+                    # elementNumber = elementNumber + 1
+                    # localNode1 = circumferentialElementIdx + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
+                    # if circumferentialElementIdx == numberOfCircumferentialElements:
+                        # localNode2 = 1 + (lengthElementIdx-1)*numberOfCircumferentialNodes + (wallElementIdx-1)*numberOfCircumferentialNodes*numberOfLengthNodes
+                    # else:
+                        # localNode2 = localNode1 + 1
+                    # localNode3 = localNode1 + numberOfCircumferentialNodes
+                    # localNode4 = localNode2 + numberOfCircumferentialNodes
+                    # #print (elementNumber, localNode1,localNode2,localNode3,localNode4)
+                    # growthElementRate[elementNumber-1,0] = (growthRatePoints[localNode1-1,0] + growthRatePoints[localNode2-1,0] + growthRatePoints[localNode3-1,0] + growthRatePoints[localNode4-1,0])/4
+                    # growthElementRate[elementNumber-1,1] = (growthRatePoints[localNode1-1,1] + growthRatePoints[localNode2-1,1] + growthRatePoints[localNode3-1,1] + growthRatePoints[localNode4-1,1])/4
+                    # growthElementRate[elementNumber-1,2] = (growthRatePoints[localNode1-1,2] + growthRatePoints[localNode2-1,2] + growthRatePoints[localNode3-1,2] + growthRatePoints[localNode4-1,2])/4
+        # return growthElementRate
+        return interpolatedRates
         
     def solveAndGetSurfaceDescriptors(self,growthRate):
         numberOfCircumferentialElements = self.circumferentialElements
