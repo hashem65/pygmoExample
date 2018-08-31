@@ -65,7 +65,7 @@
         <variable name="K12" units="strain"/>
         <variable name="K13" units="strain"/>
         <variable name="K23" units="strain"/>
-        <!-- Temporary variables -->
+        <!-- Temporary variables   the deleted term +2{dimensionless}*(J-1{dimensionless})*K23/(0.01{dimensionless}*J)-->
         <math xmlns="http://www.w3.org/1998/Math/MathML">
             <apply>
                 <eq/>
@@ -258,70 +258,49 @@
                 <eq/>
                 <ci>Tdev11</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">1</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K11</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K11</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K11</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
@@ -330,70 +309,49 @@
                 <eq/>
                 <ci>Tdev22</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">1</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K22</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K22</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K22</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
@@ -402,70 +360,49 @@
                 <eq/>
                 <ci>Tdev33</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">1</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">1</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K33</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K33</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K33</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
@@ -474,70 +411,49 @@
                 <eq/>
                 <ci>Tdev12</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">0</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">0</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K12</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K12</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K12</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
@@ -546,70 +462,49 @@
                 <eq/>
                 <ci>Tdev13</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">0</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">0</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K13</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K13</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K13</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
@@ -618,70 +513,49 @@
                 <eq/>
                 <ci>Tdev23</ci>
                 <apply>
-                    <plus/>
+                    <times/>
+                    <cn cellml:units="dimensionless">2</cn>
+                    <ci>c1</ci>
                     <apply>
-                        <times/>
-                        <cn cellml:units="dimensionless">2</cn>
-                        <ci>c1</ci>
+                        <power/>
+                        <ci>J</ci>
                         <apply>
-                            <power/>
-                            <ci>J</ci>
+                            <divide/>
                             <apply>
-                                <divide/>
-                                <apply>
-                                    <minus/>
-                                    <cn cellml:units="dimensionless">2</cn>
-                                </apply>
-                                <cn cellml:units="dimensionless">3</cn>
+                                <minus/>
+                                <cn cellml:units="dimensionless">2</cn>
                             </apply>
+                            <cn cellml:units="dimensionless">3</cn>
                         </apply>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <cn cellml:units="dimensionless">0</cn>
                         <apply>
-                            <minus/>
-                            <cn cellml:units="dimensionless">0</cn>
-                            <apply>
-                                <divide/>
-                                <apply>
-                                    <times/>
-                                    <ci>trC</ci>
-                                    <ci>K23</ci>
-                                </apply>
-                                <apply>
-                                    <times/>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                    <ci>J</ci>
-                                    <ci>J</ci>
-                                </apply>
-                            </apply>
-                        </apply>
-                        <apply>
-                            <exp/>
+                            <divide/>
                             <apply>
                                 <times/>
-                                <ci>c2</ci>
-                                <apply>
-                                    <minus/>
-                                    <ci>Ibar</ci>
-                                    <cn cellml:units="dimensionless">3</cn>
-                                </apply>
+                                <ci>trC</ci>
+                                <ci>K23</ci>
+                            </apply>
+                            <apply>
+                                <times/>
+                                <cn cellml:units="dimensionless">3</cn>
+                                <ci>J</ci>
+                                <ci>J</ci>
                             </apply>
                         </apply>
                     </apply>
                     <apply>
-                        <divide/>
+                        <exp/>
                         <apply>
                             <times/>
-                            <cn cellml:units="dimensionless">2</cn>
+                            <ci>c2</ci>
                             <apply>
                                 <minus/>
-                                <ci>J</ci>
-                                <cn cellml:units="dimensionless">1</cn>
+                                <ci>Ibar</ci>
+                                <cn cellml:units="dimensionless">3</cn>
                             </apply>
-                            <ci>K23</ci>
-                        </apply>
-                        <apply>
-                            <times/>
-                            <cn cellml:units="dimensionless">0.01</cn>
-                            <ci>J</ci>
                         </apply>
                     </apply>
                 </apply>
