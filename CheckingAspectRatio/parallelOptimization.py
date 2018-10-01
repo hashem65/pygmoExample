@@ -14,7 +14,7 @@ if __name__ == '__main__':
     wallElements=1
     discret=10
     length=4
-    innerRadius=1.0
+    innerRadius=0.5
     outerRadius=2.0
     fixBottom=True
     fixTop = False
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # growthParameters[0:4,3:]=0.0
     # growthParameters[4:8,3:]=0.0
-
+	
     growthLogic = TubeGrower(circumferentialElements,axialElements,wallElements,discret,length,innerRadius,outerRadius,fixBottom,fixTop, DMBC,humphrey, neoHookean) # ,stage,division, layers)
     growthLogic.setupProblem()
     #filename = "HeartTubeGrowth_" + "Undeformed"
@@ -44,8 +44,8 @@ if __name__ == '__main__':
     try:
         targetCoordinates = growthLogic.solveAndGetSurfaceDescriptors(growthParameters)
         #filename = "HeartTubeGrowth_" + "target"
-        filename = "HeartTubeGrowth_" + "deformed"
-        growthLogic.saveResults(filename)
+        #filename = "HeartTubeGrowth_" + "deformed"
+        #growthLogic.saveResults(filename)
         result = {'nodePositions':targetCoordinates.tolist()}
     except Exception as e:
         result={'error':str(e)}
