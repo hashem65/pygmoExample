@@ -114,7 +114,7 @@ class GrowthOptimization(object):
                 growthFull[:,0:3] = growthRatesMain[:,:] 
                 coordinates = findDeformedCoordinates(growthFull)
                 f1 = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1)) 
-                f2 = np.sum(np.linalg.norm(x.reshape(8,3),axis=1))*4e6
+                f2 = np.sum(np.linalg.norm(x.reshape(8,3),axis=1))*4e5
                 f = f1 + f2
                 self.addSolution(x, f)
                 currentAnswer = f
