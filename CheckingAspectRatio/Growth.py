@@ -14,7 +14,7 @@ class TubeGrower(object):
 
     maxSolvebleRate = 0.1
     
-    def __init__(self, circumferentialElements,axialElements,wallElements,discret=10,length=4,innerRadius=1,outerRadius=2.0,fixBottom=True,fixTop=False,DMBC=True,humphrey=False,neoHookean=False):
+    def __init__(self, circumferentialElements,axialElements,wallElements,discret=10,length=4,innerRadius=0.5,outerRadius=2.0,fixBottom=True,fixTop=False,DMBC=True,humphrey=False,neoHookean=False):
         self.circumferentialElements = circumferentialElements
         self.axialElements = axialElements
         self.wallElements = wallElements
