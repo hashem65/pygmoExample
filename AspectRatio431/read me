@@ -1,0 +1,31 @@
+
+12 rates have been experienced 
+
+in a 431 mesh 
+
+12 rates in one layer and repeated in all of the layers. .. 
+
+distributed element-based 
+
+First Layer:
+        growthRate[0,:3] = 0.18,0.23,0.06
+        growthRate[1,:3] = 0.19,0.14,0.05
+        growthRate[2,:3] = -0.13,-0.03,0.04
+        growthRate[3,:3] = -0.02,-0.12,0.06	
+2nd
+        growthRate[4,:3] = 0.18,0.23,0.06
+        growthRate[5,:3] = 0.19,0.14,0.05
+        growthRate[6,:3] = -0.13,-0.03,0.04
+        growthRate[7,:3] = -0.02,-0.12,0.06	
+3rd
+        growthRate[8,:3] = 0.18,0.23,0.06
+        growthRate[9,:3] = 0.19,0.14,0.05
+        growthRate[10,:3] = -0.13,-0.03,0.04
+        growthRate[11,:3] = -0.02,-0.12,0.06	
+
+Shear Rates 
+        growthRate[0:4,3:]=0.0
+        growthRate[4:8,3:]=0.0
+        growthRate[8:,3:]=0.0
+        
+        
