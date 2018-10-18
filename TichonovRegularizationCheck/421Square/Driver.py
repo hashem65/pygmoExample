@@ -153,6 +153,8 @@ class GrowthOptimization(object):
                 growthFull[:,0:1] = growthRatesMain[:,:] 
                 coordinates = findDeformedCoordinates(growthFull)
                 exactAnswer[:,0] = 0.18,0.16,0.17,0.19,0.17,0.15,0.16,0.18
+                #growthFull[:,0] = 0.18,0.16,0.17,0.19,0.17,0.15,0.16,0.18
+                #x[:] =  0.18,0.16,0.17,0.19,0.17,0.15,0.16,0.18
                 #print (exactAnswer.shape)
                 f1 = np.sum(np.linalg.norm(coordinates-self.targetCoordinates,axis=1)) 
                 fit = np.sum(np.linalg.norm(x.reshape(8,1)-exactAnswer,axis=1))
@@ -171,7 +173,8 @@ class GrowthOptimization(object):
                 #print ('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',continuity)
                 # f2 = np.sum(np.linalg.norm(x.reshape(4,3),axis=1))*4e6
                 f2 = np.sum(np.linalg.norm(continuity,axis=1))    # *5e8      # 0.68 minimum 
-                f= fit + 5*f2   #   +f1
+                #print ('norm',f2)
+                f= fit + 5*(f2 - 0.0019)   #   +f1
                 #print (f1,f2,f1,f2,f1,f2,f1,f2)
                 self.addSolution(x, f)
                 currentAnswer = f
